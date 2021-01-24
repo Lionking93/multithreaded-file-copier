@@ -5,12 +5,15 @@
  */
 package leo.multithreaded.file.copier;
 
+import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import leo.multithreaded.file.copier.commandlineargs.CommandLineArgParseResult;
 import leo.multithreaded.file.copier.commandlineargs.CommandLineArgParser;
+import leo.multithreaded.file.copier.properties.FileCopierProperties;
+import leo.multithreaded.file.copier.properties.PropertyLoader;
 import leo.multithreaded.file.copier.services.FileToQueueWriter;
 import leo.multithreaded.file.copier.services.QueueToFileWriter;
 
@@ -27,9 +30,11 @@ public class FileCopier {
             System.exit(1);
         }
         
-        BlockingQueue charQueue = new LinkedBlockingQueue(20);
-        FileToQueueWriter fileReader = new FileToQueueWriter(parsedArgs.getSourceFile(), charQueue, 60);
-        QueueToFileWriter fileWriter = new QueueToFileWriter(parsedArgs.getDestFile(), charQueue, 60);
+        FileCopierProperties props = PropertyLoader.readConfig();
+        
+        BlockingQueue charQueue = new LinkedBlockingQueue(props.getQueueSize());
+        FileToQueueWriter fileReader = new FileToQueueWriter(parsedArgs.getSourceFile(), charQueue, props.getQueueWriteTimeoutInSeconds());
+        QueueToFileWriter fileWriter = new QueueToFileWriter(parsedArgs.getDestFile(), charQueue, props.getQueueReadTimeoutInSeconds());
         
         Thread readFileThread = new Thread(fileReader, "FileReader");
         Thread writeFileThread = new Thread(fileWriter, "FileWriter");
