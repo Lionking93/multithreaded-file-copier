@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package leo.multithreaded.file.copier.dto;
+package leo.multithreadedfilecopier.dto;
 
 /**
  *

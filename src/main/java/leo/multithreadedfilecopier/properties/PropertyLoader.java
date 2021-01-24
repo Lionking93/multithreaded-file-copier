@@ -3,20 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package leo.multithreaded.file.copier.properties;
+package leo.multithreadedfilecopier.properties;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import leo.multithreaded.file.copier.FileCopier;
+import leo.multithreadedfilecopier.FileCopier;
 
 /**
  *
- * @author Omistaja
+ * @author Leo Kallonen
  */
 public class PropertyLoader {
     public static FileCopierProperties readConfig() { 
@@ -26,9 +24,9 @@ public class PropertyLoader {
             Properties prop = new Properties();
             prop.load(is);
             
-            fcProps.setQueueReadTimeoutInSeconds(Integer.parseInt(prop.getProperty("queueReadTimeoutInSeconds")));
-            fcProps.setQueueWriteTimeoutInSeconds(Integer.parseInt(prop.getProperty("queueWriteTimeoutInSeconds")));
-            fcProps.setQueueSize(Integer.parseInt(prop.getProperty("queueSize")));
+            fcProps.setStackReadTimeoutInSeconds(Integer.parseInt(prop.getProperty("stackReadTimeoutInSeconds")));
+            fcProps.setStackWriteTimeoutInSeconds(Integer.parseInt(prop.getProperty("stackWriteTimeoutInSeconds")));
+            fcProps.setStackSize(Integer.parseInt(prop.getProperty("stackSize")));
         } catch (IOException ex) { 
             Logger.getLogger(PropertyLoader.class.getName()).log(Level.SEVERE, "Config file not found!", ex);
         } catch (NumberFormatException ex2) {

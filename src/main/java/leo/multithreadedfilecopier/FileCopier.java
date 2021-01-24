@@ -3,23 +3,24 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package leo.multithreaded.file.copier;
+package leo.multithreadedfilecopier;
 
-import java.io.IOException;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import leo.multithreaded.file.copier.commandlineargs.CommandLineArgParseResult;
-import leo.multithreaded.file.copier.commandlineargs.CommandLineArgParser;
-import leo.multithreaded.file.copier.properties.FileCopierProperties;
-import leo.multithreaded.file.copier.properties.PropertyLoader;
-import leo.multithreaded.file.copier.services.FileToQueueWriter;
-import leo.multithreaded.file.copier.services.QueueToFileWriter;
+import leo.multithreadedfilecopier.commandlineargs.CommandLineArgParseResult;
+import leo.multithreadedfilecopier.commandlineargs.CommandLineArgParser;
+import leo.multithreadedfilecopier.properties.FileCopierProperties;
+import leo.multithreadedfilecopier.properties.PropertyLoader;
+import leo.multithreadedfilecopier.services.FileToStackWriter;
+import leo.multithreadedfilecopier.services.StackToFileWriter;
 
 /**
  *
- * @author Omistaja
+ * @author Leo Kallonen
  */
 public class FileCopier {
     public static void main(String[] args) {
@@ -32,9 +33,9 @@ public class FileCopier {
         
         FileCopierProperties props = PropertyLoader.readConfig();
         
-        BlockingQueue charQueue = new LinkedBlockingQueue(props.getQueueSize());
-        FileToQueueWriter fileReader = new FileToQueueWriter(parsedArgs.getSourceFile(), charQueue, props.getQueueWriteTimeoutInSeconds());
-        QueueToFileWriter fileWriter = new QueueToFileWriter(parsedArgs.getDestFile(), charQueue, props.getQueueReadTimeoutInSeconds());
+        BlockingDeque charStack = new LinkedBlockingDeque(props.getStackSize());
+        FileToStackWriter fileReader = new FileToStackWriter(parsedArgs.getSourceFile(), charStack, props.getStackWriteTimeoutInSeconds());
+        StackToFileWriter fileWriter = new StackToFileWriter(parsedArgs.getDestFile(), charStack, props.getStackReadTimeoutInSeconds());
         
         Thread readFileThread = new Thread(fileReader, "FileReader");
         Thread writeFileThread = new Thread(fileWriter, "FileWriter");

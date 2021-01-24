@@ -1,3 +1,4 @@
 *.txt
 target/
 nbactions.xml
+/nbproject/
