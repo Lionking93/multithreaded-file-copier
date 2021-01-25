@@ -24,7 +24,7 @@ public class FileToStackWriterTest {
     @Test
     public void testThatCharsAreAddedToStackInCorrectOrder() throws InterruptedException {
         BlockingDeque stack = new LinkedBlockingDeque();
-        String filePath = getClass().getClassLoader().getResource("test-file-1.txt").getPath();
+        String filePath = getClass().getClassLoader().getResource("test-source-file.txt").getPath();
         
         FileToStackWriter fileReader = new FileToStackWriter(filePath, stack, 20);
         

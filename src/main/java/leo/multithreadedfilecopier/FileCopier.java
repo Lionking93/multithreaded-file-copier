@@ -7,7 +7,6 @@ package leo.multithreadedfilecopier;
 
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import leo.multithreadedfilecopier.commandlineargs.CommandLineArgParseResult;
@@ -27,7 +26,7 @@ public class FileCopier {
         
         if (!parsedArgs.isParseSuccessful()) {
             Logger.getLogger(FileCopier.class.getName()).log(Level.SEVERE, parsedArgs.getErrorText());
-            System.exit(1);
+            throw new IllegalArgumentException(parsedArgs.getErrorText());
         }
         
         FileCopierProperties props = PropertyLoader.readConfig();
@@ -47,19 +46,19 @@ public class FileCopier {
                 charStack,
                 props.getStackReadTimeoutInSeconds());
         
+        Thread readFileThread = new Thread(fileReader, "FileReader");
+        Thread writeFileThread = new Thread(fileWriter, "FileWriter");
+
         fileReader.setErrorHandler((String errorMsg, Exception ex) -> {
             Logger.getLogger(StackToFileWriter.class.getName()).log(Level.SEVERE, errorMsg, ex);
-            System.exit(1);
+            writeFileThread.interrupt();
         });
         
         fileWriter.setErrorHandler((String errorMsg, Exception ex) -> {
             Logger.getLogger(FileToStackWriter.class.getName()).log(Level.SEVERE, errorMsg, ex);
-            System.exit(1);
+            readFileThread.interrupt();
         });
         
-        Thread readFileThread = new Thread(fileReader, "FileReader");
-        Thread writeFileThread = new Thread(fileWriter, "FileWriter");
-
         readFileThread.start();
         writeFileThread.start();
     }
