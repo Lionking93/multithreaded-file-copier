@@ -12,6 +12,7 @@
         <junit.version>5.7.0</junit.version>
         <jacoco.version>0.8.6</jacoco.version>
         <surefire-plugin.version>2.22.2</surefire-plugin.version>
+        <jar-plugin.version>3.2.0</jar-plugin.version>
     </properties>
     <dependencies>
         <dependency>
@@ -29,14 +30,21 @@
     </dependencies>
     <build>
         <plugins>
-           <plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${jar-plugin.version}</version>
+                <configuration>>
+                    <archive>
+                        <manifest>
+                            <mainClass>leo.multithreadedfilecopier.FileCopier</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
-                <configuration>
-                    <excludes>
-                        <exclude/>
-                    </excludes>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>

@@ -27,15 +27,7 @@ public class Message {
         return type;
     }
 
-    public void setType(MessageType type) {
-        this.type = type;
-    }
-
     public char getContent() {
         return content;
-    }
-
-    public void setContent(char content) {
-        this.content = content;
     }
 }

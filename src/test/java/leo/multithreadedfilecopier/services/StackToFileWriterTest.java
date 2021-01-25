@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import leo.multithreadedfilecopier.dto.Message;
@@ -31,24 +32,43 @@ public class StackToFileWriterTest {
     @BeforeEach
     public void initFileReader() {
         this.stack = new LinkedBlockingDeque();
+        this.stack.addFirst(new Message(MessageType.POISON_PILL));
         this.filePath = StackToFileWriterTest.class.getProtectionDomain().getCodeSource().getLocation().getPath() + File.separator + "test-file-2.txt";
         this.fileWriter = new StackToFileWriter(filePath, this.stack, 20);
     }
 
     @Test
-    public void testThatCharsAreAddedToStackInCorrectOrder() throws InterruptedException, FileNotFoundException, IOException {
-        this.stack.addFirst(new Message(MessageType.POISON_PILL));
-        this.stack.addFirst(new Message(MessageType.LETTER, 't'));
-        this.stack.addFirst(new Message(MessageType.LETTER, 'e'));
-        this.stack.addFirst(new Message(MessageType.LETTER, 's'));
-        this.stack.addFirst(new Message(MessageType.LETTER, 't'));
-        this.stack.addFirst(new Message(MessageType.LETTER, 'i'));
+    public void testThatCharsAreAddedToStackInCorrectOrder() throws IOException {
+        addStringToStack("testi");
 
         this.fileWriter.run();
         
+        String fileContents = readWrittenTestFile();
+        
+        assertEquals("itset", fileContents);
+    }
+    
+    @Test
+    public void testThatCopyingWorksForUtf8Chars() throws IOException {
+        addStringToStack("ääkkösiä");
+        
+        this.fileWriter.run();
+        
+        String fileContents = readWrittenTestFile();
+        
+        assertEquals("äisökkää", fileContents);
+    }
+    
+    private void addStringToStack(String str) {        
+        for (char c : str.toCharArray()) {
+            this.stack.addFirst(new Message(MessageType.LETTER, c));
+        }
+    }
+    
+    private String readWrittenTestFile() throws FileNotFoundException, IOException {
         String fileContents = "";
         
-        try (BufferedReader br = new BufferedReader(new FileReader(this.filePath))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(this.filePath, StandardCharsets.UTF_8))) {
             int charNum = br.read();
             while (charNum != -1) {
                 fileContents += (char)charNum;
@@ -56,6 +76,6 @@ public class StackToFileWriterTest {
             }
         }
         
-        assertEquals("itset", fileContents);
+        return fileContents;
     }
 }
