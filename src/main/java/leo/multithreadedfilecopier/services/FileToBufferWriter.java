@@ -8,6 +8,7 @@ package leo.multithreadedfilecopier.services;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
@@ -22,26 +23,25 @@ import leo.multithreadedfilecopier.dto.MessageType;
 public class FileToBufferWriter implements Runnable {
     private final String fileName;
     private final BufferManager bufferManager;
+    private final Charset sourceFileEncoding;
+    // Not final because should be set after initialization
     private BiConsumer<String, Exception> errorHandler;
     
     public void setErrorHandler(BiConsumer<String, Exception> pErrorHandler) {
         this.errorHandler = pErrorHandler;
     }
     
-    public FileToBufferWriter(String pFileName, BufferManager pBufferManager) {
+    public FileToBufferWriter(String pFileName, BufferManager pBufferManager, Charset pSourceFileEncoding) {
         this.fileName = pFileName;
         this.bufferManager = pBufferManager;
+        this.sourceFileEncoding = pSourceFileEncoding;
+        System.out.println(this.sourceFileEncoding.toString());
         this.errorHandler = (String errorMsg, Exception ex) -> Logger.getLogger(FileToBufferWriter.class.getName()).log(Level.SEVERE, errorMsg, ex);
-    }
-
-    public FileToBufferWriter(String pFileName, BufferManager pBufferManager, BiConsumer<String, Exception> pErrorHandler) {
-        this(pFileName, pBufferManager);
-        this.errorHandler = pErrorHandler;
     }
 
     @Override
     public void run() {
-        try (BufferedReader br = new BufferedReader(new FileReader(this.fileName, StandardCharsets.UTF_8))) { 
+        try (BufferedReader br = new BufferedReader(new FileReader(this.fileName, this.sourceFileEncoding))) { 
             int charNum = br.read();
             
             while (charNum != -1 ) {

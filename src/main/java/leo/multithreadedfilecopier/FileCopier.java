@@ -38,11 +38,13 @@ public class FileCopier {
         
         FileToBufferWriter fileReader = new FileToBufferWriter(
                 parsedArgs.getSourceFile(),
-                bufferManager);
+                bufferManager,
+                parsedArgs.getFileEncoding());
         
         BufferToFileWriter fileWriter = new BufferToFileWriter(
                 parsedArgs.getDestFile(),
-                bufferManager);
+                bufferManager,
+                parsedArgs.getFileEncoding());
         
         Thread readFileThread = new Thread(fileReader, "FileReader");
         Thread writeFileThread = new Thread(fileWriter, "FileWriter");

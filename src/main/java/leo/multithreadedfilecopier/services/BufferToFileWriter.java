@@ -8,7 +8,7 @@ package leo.multithreadedfilecopier.services;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,21 +21,19 @@ import leo.multithreadedfilecopier.dto.BufferContents;
 public class BufferToFileWriter implements Runnable {
     private final String fileName;
     private final BufferManager stackWaitNotify;
+    private final Charset destFileEncoding;
+    // Not final because needs to be set after initialization
     private BiConsumer<String, Exception> errorHandler;
     
     public void setErrorHandler(BiConsumer<String, Exception> pErrorHandler) {
         this.errorHandler = pErrorHandler;
     }
     
-    public BufferToFileWriter(String pFileName, BufferManager pStackWaitNotify) {
+    public BufferToFileWriter(String pFileName, BufferManager pStackWaitNotify, Charset pDestFileEncoding) {
         this.fileName = pFileName;
+        this.destFileEncoding = pDestFileEncoding;
         this.stackWaitNotify = pStackWaitNotify;
         this.errorHandler = (String errorMsg, Exception ex) -> Logger.getLogger(BufferToFileWriter.class.getName()).log(Level.SEVERE, errorMsg, ex);
-    }
-    
-    public BufferToFileWriter(String pFileName, BufferManager pStackWaitNotify, BiConsumer<String, Exception> pErrorHandler) {
-        this(pFileName, pStackWaitNotify);
-        this.errorHandler = pErrorHandler;
     }
 
     @Override
@@ -44,7 +42,7 @@ public class BufferToFileWriter implements Runnable {
             this.stackWaitNotify.waitForBufferToFill();
         }
         
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.fileName, StandardCharsets.UTF_8))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.fileName, this.destFileEncoding))) {
             while (true) {        
                 BufferContents bufferContents = this.stackWaitNotify.getBufferContents();
 
