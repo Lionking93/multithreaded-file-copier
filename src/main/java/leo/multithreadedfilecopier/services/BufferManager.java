@@ -41,14 +41,12 @@ public class BufferManager {
             boolean endOfFileReached = false;
 
             while (!this.buffer.isEmpty()) {
-                System.out.println(String.format("Stack size: %d", this.buffer.size()));
                 Message msg = this.buffer.pollFirst();
 
                 if (msg.getType() == MessageType.POISON_PILL) {
                     endOfFileReached = true;
                 } else if (msg.getType() == MessageType.LETTER) {
                     stackContentString = msg.getContent() + stackContentString;
-                    System.out.println(stackContentString);
                 }
             }
 
