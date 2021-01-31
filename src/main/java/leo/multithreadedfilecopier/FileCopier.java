@@ -1,14 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package leo.multithreadedfilecopier;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import leo.multithreadedfilecopier.commandlineargs.CommandLineArgParseResult;
@@ -49,6 +40,8 @@ public class FileCopier {
         Thread readFileThread = new Thread(fileReader, "FileReader");
         Thread writeFileThread = new Thread(fileWriter, "FileWriter");
 
+        // Add error handler callbacks for threads. If one thread fails, interrupt and stop the other also.
+        
         fileReader.setErrorHandler((String errorMsg, Exception ex) -> {
             Logger.getLogger(BufferToFileWriter.class.getName()).log(Level.SEVERE, errorMsg, ex);
             writeFileThread.interrupt();
@@ -62,6 +55,7 @@ public class FileCopier {
         readFileThread.start();
         writeFileThread.start();
         
+        // Wait for threads to finish.
         try {
             readFileThread.join();
             writeFileThread.join();

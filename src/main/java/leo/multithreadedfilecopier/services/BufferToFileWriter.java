@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package leo.multithreadedfilecopier.services;
 
 import java.io.BufferedWriter;
@@ -15,7 +10,9 @@ import java.util.logging.Logger;
 import leo.multithreadedfilecopier.dto.BufferContents;
 
 /**
- *
+ * This class contains the functionality to read characters from a stack buffer and write
+ * them to new file in an own thread.
+ * 
  * @author Leo Kallonen
  */
 public class BufferToFileWriter implements Runnable {
@@ -38,21 +35,30 @@ public class BufferToFileWriter implements Runnable {
 
     @Override
     public void run() {
-        if (!this.stackWaitNotify.isBuffer()) {
+        // Buffer reader thread should go to wait state at the beginning because buffer
+        // needs to be filled first
+        if (!this.stackWaitNotify.isBufferFull()) {
             this.stackWaitNotify.waitForBufferToFill();
         }
         
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.fileName, this.destFileEncoding))) {
             while (true) {        
+                // Buffer contents are read one character at a time and results are combined to a string
+                // that is stored in BufferContents object
                 BufferContents bufferContents = this.stackWaitNotify.getBufferContents();
 
+                // Write buffer contents to file.
                 bw.write(bufferContents.getContents());
                 
+                // File copying is completed if end of source file is reached, while loop can be
+                // exited.
                 if (bufferContents.isEndOfFileReached()) {
-                    System.out.println("End of file reached");
+                    Logger.getLogger(BufferToFileWriter.class.getName(), "End of file reached.");
                     break;
                 }
                 
+                // When buffer is empty, this thread can go to waiting state to wait for the 
+                // buffer to fill.
                 this.stackWaitNotify.signalReceiveEnded();
                 this.stackWaitNotify.waitForBufferToFill();                
             }

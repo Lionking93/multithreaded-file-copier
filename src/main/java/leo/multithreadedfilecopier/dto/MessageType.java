@@ -1,13 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package leo.multithreadedfilecopier.dto;
 
 /**
- *
- * @author Omistaja
+ * The possible types for elements that can be put to buffer. LETTER represents a
+ * single character that has been read from source file. POISON_PILL represents an
+ * element that signals for buffer readed that reading can end as all characters
+ * have bene read from source file.
+ * 
+ * @author Leo Kallonen
  */
 public enum MessageType {
     LETTER,

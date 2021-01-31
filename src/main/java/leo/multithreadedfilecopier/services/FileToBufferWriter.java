@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package leo.multithreadedfilecopier.services;
 
 import java.io.BufferedReader;
@@ -16,7 +11,9 @@ import leo.multithreadedfilecopier.dto.Message;
 import leo.multithreadedfilecopier.dto.MessageType;
 
 /**
- *
+ * This class contains functionality to read characters from source file and write
+ * them to a stack buffer one character at a time in a separate thread.
+ * 
  * @author Leo Kallonen
  */
 public class FileToBufferWriter implements Runnable {
@@ -44,7 +41,9 @@ public class FileToBufferWriter implements Runnable {
             int charNum = br.read();
             
             while (charNum != -1 ) {
-                if (this.bufferManager.isBuffer()) {
+                // If buffer is full, this thread should go to waiting state and wait
+                // for buffer reader thread to read and empty the buffer.
+                if (this.bufferManager.isBufferFull()) {
                     this.bufferManager.signalTransferEnded();
                     this.bufferManager.waitForBufferToEmpty();
                 }
@@ -62,11 +61,14 @@ public class FileToBufferWriter implements Runnable {
         }
         
         try {
-            while (this.bufferManager.isBuffer()) {
+            while (this.bufferManager.isBufferFull()) {
                 this.bufferManager.signalTransferEnded();
                 this.bufferManager.waitForBufferToEmpty();
             }
             
+            // After all characters from source file have been written to a buffer, put an element
+            // of type POISON_PILL to the stack buffer to signal to the buffer reader that reading can
+            // be stopped.
             this.bufferManager.writeMessageToBuffer(new Message(MessageType.POISON_PILL));
             this.bufferManager.signalTransferEnded();
             Logger.getLogger(FileToBufferWriter.class.getName()).log(Level.INFO, "Whole file has been copied.");

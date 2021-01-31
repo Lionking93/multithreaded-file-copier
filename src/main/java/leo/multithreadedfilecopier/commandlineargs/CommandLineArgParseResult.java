@@ -1,16 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package leo.multithreadedfilecopier.commandlineargs;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
- *
- * @author Omistaja
+ * POJO that contains the result on whether command line args were parsed successfully
+ * and also stores the data that was parsed from the command line args if parse was
+ * successful.
+ * 
+ * @author Leo Kallonen
  */
 public class CommandLineArgParseResult {
     private final String sourceFile;

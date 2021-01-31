@@ -8,6 +8,13 @@ import leo.multithreadedfilecopier.dto.BufferContents;
 import leo.multithreadedfilecopier.dto.Message;
 import leo.multithreadedfilecopier.dto.MessageType;
 
+/**
+ * This class provides a thread safe interface for adding elements to a buffer stack
+ * and reading elements from it. The class will not allow to write to stack if its
+ * max size has already been reached.
+ * 
+ * @author Leo Kallonen
+ */
 public class BufferManager {
     private final Deque<Message> buffer;
     private boolean timeToTransfer = true;
@@ -19,7 +26,7 @@ public class BufferManager {
         this.bufferMaxSize = pBufferMaxSize;
     }
     
-    public boolean isBuffer() {
+    public boolean isBufferFull() {
         synchronized(this.buffer) {
             return this.buffer.size() == this.bufferMaxSize;
         }
@@ -27,14 +34,24 @@ public class BufferManager {
     
     public boolean writeMessageToBuffer(Message charMsg) throws InterruptedException {
         synchronized(this.buffer) {
-            if (isBuffer()) {
+            if (isBufferFull()) {
                 return false;
             }
             
+            // Stack is implemented by adding and removing elements from the front of the deque.
             return this.buffer.offerFirst(charMsg);
         }
     }
     
+    /**
+     * This method empties the entire stack buffer and forms a string of the characters
+     * that have been read. If element with type POISON_PILL was encountered in stack buffer,
+     * then this method also stores the information to the return value that after this buffer read,
+     * the file copying has been completed
+     * 
+     * @return BufferContents Contains the buffer contents as string and information on whether buffer reading can
+     * be ended.
+     */
     public BufferContents getBufferContents() {
         synchronized(this.buffer) {            
             String stackContentString = "";
@@ -46,6 +63,8 @@ public class BufferManager {
                 if (msg.getType() == MessageType.POISON_PILL) {
                     endOfFileReached = true;
                 } else if (msg.getType() == MessageType.LETTER) {
+                    // Because characters are in reverse order in stack, the read character always needs to
+                    // be put to the front of the string that represents the stack buffer contents.
                     stackContentString = msg.getContent() + stackContentString;
                 }
             }
@@ -54,6 +73,10 @@ public class BufferManager {
         }
     }
     
+    /**
+     * BufferToFileWriter object calls this method when it needs to go to wait state to wait
+     * that FileToBufferWriter object has added elements to the stack buffer.
+     */
     public void waitForBufferToFill() {
         synchronized(this.buffer) {
             while (!this.timeToReceive && this.timeToTransfer) {
@@ -66,6 +89,10 @@ public class BufferManager {
         }
     }
     
+    /**
+     * FileToBufferWriter object calls this method when it needs to go to wait state to wait
+     * that BufferToFileWriter object reads elements from the stack buffer.
+     */
     public void waitForBufferToEmpty() {
         synchronized(this.buffer) {
             while (this.timeToReceive && !this.timeToTransfer) {
@@ -78,6 +105,10 @@ public class BufferManager {
         }
     }
     
+    /**
+     * BufferToFileWriter object calls this method to report to FileToBufferWriter object
+     * that buffer has been emptied and buffer can be filled again.
+     */
     public void signalReceiveEnded() {
         synchronized(this.buffer) {
             this.timeToReceive = false;
@@ -86,6 +117,10 @@ public class BufferManager {
         }
     }
     
+    /**
+     * FileToBufferWriter object calls this method to report to BufferToFileWriter object
+     * that buffer is full and it should be emptied.
+     */
     public void signalTransferEnded() {
         synchronized(this.buffer) {
             this.timeToReceive = true;

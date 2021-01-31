@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package leo.multithreadedfilecopier.properties;
 
 import java.io.IOException;
@@ -13,7 +8,9 @@ import java.util.logging.Logger;
 import leo.multithreadedfilecopier.FileCopier;
 
 /**
- *
+ * This class reads values from config.properties file and stores them in FileCopierProperties
+ * object.
+ * 
  * @author Leo Kallonen
  */
 public class PropertyLoader {
