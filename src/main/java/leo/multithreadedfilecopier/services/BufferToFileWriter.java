@@ -53,7 +53,7 @@ public class BufferToFileWriter implements Runnable {
                 // File copying is completed if end of source file is reached, while loop can be
                 // exited.
                 if (bufferContents.isEndOfFileReached()) {
-                    Logger.getLogger(BufferToFileWriter.class.getName(), "End of file reached.");
+                    Logger.getLogger(BufferToFileWriter.class.getName()).log(Level.INFO, "End of file reached.");
                     break;
                 }
                 
