@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,7 +68,6 @@ public class FileToBufferWriter implements Runnable {
             }
             
             this.bufferManager.writeMessageToBuffer(new Message(MessageType.POISON_PILL));
-            System.out.println("Write poison pill");
             this.bufferManager.signalTransferEnded();
             Logger.getLogger(FileToBufferWriter.class.getName()).log(Level.INFO, "Whole file has been copied.");
         } catch (InterruptedException ex) {

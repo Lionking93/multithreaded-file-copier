@@ -54,9 +54,7 @@ public class BufferToFileWriter implements Runnable {
                 }
                 
                 this.stackWaitNotify.signalReceiveEnded();
-                this.stackWaitNotify.waitForBufferToFill();
-                
-                System.out.println("Hello there");
+                this.stackWaitNotify.waitForBufferToFill();                
             }
         } catch (IOException ex) {
             this.errorHandler.accept("Writing char from stack to dest file failed.", ex);

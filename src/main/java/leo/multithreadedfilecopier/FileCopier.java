@@ -66,7 +66,7 @@ public class FileCopier {
             readFileThread.join();
             writeFileThread.join();
         } catch (InterruptedException e) {
-            Logger.getLogger(FileCopier.class.getName()).log(Level.WARNING, "Join throwed InterruptedException.", e);
+            Logger.getLogger(FileCopier.class.getName()).log(Level.WARNING, "Thread.join throwed InterruptedException.", e);
         }
     }
 }
