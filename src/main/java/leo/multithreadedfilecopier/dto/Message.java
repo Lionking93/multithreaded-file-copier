@@ -10,8 +10,8 @@ package leo.multithreadedfilecopier.dto;
  * @author Omistaja
  */
 public class Message {
-    private MessageType type;
-    private char content;
+    private final MessageType type;
+    private final char content;
 
     public Message(MessageType pType) {
         this.type = pType;

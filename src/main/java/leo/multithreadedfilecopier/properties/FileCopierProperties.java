@@ -10,31 +10,13 @@ package leo.multithreadedfilecopier.properties;
  * @author Leo Kallonen
  */
 public class FileCopierProperties {
-    private int stackWriteTimeoutInSeconds = 60;
-    private int stackReadTimeoutInSeconds = 60;
-    private int stackSize = 8192;
+    private int bufferSize = 8192;
 
-    public int getStackWriteTimeoutInSeconds() {
-        return this.stackWriteTimeoutInSeconds;
+    public int getBufferSize() {
+        return bufferSize;
     }
 
-    public void setStackWriteTimeoutInSeconds(int pStackWriteTimeoutInSeconds) {
-        this.stackWriteTimeoutInSeconds = pStackWriteTimeoutInSeconds;
-    }
-
-    public int getStackReadTimeoutInSeconds() {
-        return this.stackReadTimeoutInSeconds;
-    }
-
-    public void setStackReadTimeoutInSeconds(int pStackReadTimeoutInSeconds) {
-        this.stackReadTimeoutInSeconds = pStackReadTimeoutInSeconds;
-    }
-
-    public int getStackSize() {
-        return stackSize;
-    }
-
-    public void setStackSize(int pStackSize) {
-        this.stackSize = pStackSize;
+    public void getBufferSize(int pBufferSize) {
+        this.bufferSize = pBufferSize;
     }
 }

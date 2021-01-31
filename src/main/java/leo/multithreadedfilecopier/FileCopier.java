@@ -5,16 +5,19 @@
  */
 package leo.multithreadedfilecopier;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import leo.multithreadedfilecopier.commandlineargs.CommandLineArgParseResult;
 import leo.multithreadedfilecopier.commandlineargs.CommandLineArgParser;
+import leo.multithreadedfilecopier.services.BufferManager;
 import leo.multithreadedfilecopier.properties.FileCopierProperties;
 import leo.multithreadedfilecopier.properties.PropertyLoader;
-import leo.multithreadedfilecopier.services.FileToStackWriter;
-import leo.multithreadedfilecopier.services.StackToFileWriter;
+import leo.multithreadedfilecopier.services.FileToBufferWriter;
+import leo.multithreadedfilecopier.services.BufferToFileWriter;
 
 /**
  *
@@ -31,35 +34,37 @@ public class FileCopier {
         
         FileCopierProperties props = PropertyLoader.readConfig();
         
-        BlockingDeque charStack = new LinkedBlockingDeque(props.getStackSize());
+        BufferManager bufferManager = new BufferManager(props.getBufferSize());
         
-        Logger.getLogger(FileCopier.class.getName()).log(Level.INFO, String.format("Reading file %s to stack.", parsedArgs.getSourceFile()));
-        Logger.getLogger(FileCopier.class.getName()).log(Level.INFO, String.format("Writing to file %s from stack.", parsedArgs.getDestFile()));
-                
-        FileToStackWriter fileReader = new FileToStackWriter(
+        FileToBufferWriter fileReader = new FileToBufferWriter(
                 parsedArgs.getSourceFile(),
-                charStack,
-                props.getStackWriteTimeoutInSeconds());
+                bufferManager);
         
-        StackToFileWriter fileWriter = new StackToFileWriter(
+        BufferToFileWriter fileWriter = new BufferToFileWriter(
                 parsedArgs.getDestFile(),
-                charStack,
-                props.getStackReadTimeoutInSeconds());
+                bufferManager);
         
         Thread readFileThread = new Thread(fileReader, "FileReader");
         Thread writeFileThread = new Thread(fileWriter, "FileWriter");
 
         fileReader.setErrorHandler((String errorMsg, Exception ex) -> {
-            Logger.getLogger(StackToFileWriter.class.getName()).log(Level.SEVERE, errorMsg, ex);
+            Logger.getLogger(BufferToFileWriter.class.getName()).log(Level.SEVERE, errorMsg, ex);
             writeFileThread.interrupt();
         });
         
         fileWriter.setErrorHandler((String errorMsg, Exception ex) -> {
-            Logger.getLogger(FileToStackWriter.class.getName()).log(Level.SEVERE, errorMsg, ex);
+            Logger.getLogger(FileToBufferWriter.class.getName()).log(Level.SEVERE, errorMsg, ex);
             readFileThread.interrupt();
         });
         
         readFileThread.start();
         writeFileThread.start();
+        
+        try {
+            readFileThread.join();
+            writeFileThread.join();
+        } catch (InterruptedException e) {
+            Logger.getLogger(FileCopier.class.getName()).log(Level.WARNING, "Join throwed InterruptedException.", e);
+        }
     }
 }

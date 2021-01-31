@@ -23,10 +23,7 @@ public class PropertyLoader {
         try (InputStream is = FileCopier.class.getClassLoader().getResourceAsStream("config.properties")) {
             Properties prop = new Properties();
             prop.load(is);
-            
-            fcProps.setStackReadTimeoutInSeconds(Integer.parseInt(prop.getProperty("stackReadTimeoutInSeconds")));
-            fcProps.setStackWriteTimeoutInSeconds(Integer.parseInt(prop.getProperty("stackWriteTimeoutInSeconds")));
-            fcProps.setStackSize(Integer.parseInt(prop.getProperty("stackSize")));
+            fcProps.getBufferSize(Integer.parseInt(prop.getProperty("bufferSize")));
         } catch (IOException ex) { 
             Logger.getLogger(PropertyLoader.class.getName()).log(Level.SEVERE, "Config file not found!", ex);
         } catch (NumberFormatException ex2) {
